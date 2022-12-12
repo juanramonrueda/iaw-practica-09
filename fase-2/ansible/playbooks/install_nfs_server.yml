@@ -1,0 +1,38 @@
+---
+- name: Instalación de servidor NFS y compartición de directorio
+  hosts: nfs_server
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Actualización de los repositorios y de los programas
+      ansible.builtin.apt:
+        update_cache: true
+        only_upgrade: true
+
+    - name: Instalación del servidor NFS
+      ansible.builtin.apt:
+        name: nfs-kernel-server
+        state: present
+
+    - name: Creación del directorio que hay que compartir
+      ansible.builtin.file:
+        path: /var/www/html
+        state: directory
+        mode: 0755
+        owner: nobody
+        group: nogroup
+
+    - name: Copiado de template exports.j2 al equipo remoto
+      ansible.builtin.template:
+        src: "{{ LocalSource_exports }}"
+        dest: /etc/exports
+        mode: 0644
+
+    - name: Reinicio del servidor NFS
+      ansible.builtin.service:
+        name: nfs-kernel-server
+        state: restarted

@@ -1,0 +1,82 @@
+---
+- name: Despliegue del balanceador de carga
+  hosts: balancer
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Actualización de repositorios y programas instalados
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+
+    - name: Instalación de Apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: Habilitación de módulo proxy para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy
+        state: present
+
+    - name: Habilitación de módulo proxy_http para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy_http
+        state: present
+
+    - name: Habilitación de módulo proxy_ajp para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy_ajp
+        state: present
+
+    - name: Habilitación de módulo rewrite para el balanceador de carga
+      community.general.apache2_module:
+        name: rewrite
+        state: present
+
+    - name: Habilitación de módulo deflate para el balanceador de carga
+      community.general.apache2_module:
+        name: deflate
+        state: present
+
+    - name: Habilitación de módulo headers para el balanceador de carga
+      community.general.apache2_module:
+        name: headers
+        state: present
+
+    - name: Habilitación de módulo proxy_balancer para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy_balancer
+        state: present
+
+    - name: Habilitación de módulo proxy_connect para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy_connect
+        state: present
+
+    - name: Habilitación de módulo proxy_html para el balanceador de carga
+      community.general.apache2_module:
+        name: proxy_html
+        state: present
+
+    - name: Habilitación de módulo lbmethod_byrequests para el balanceador de carga
+      community.general.apache2_module:
+        name: lbmethod_byrequests
+        state: present
+
+    - name: Copiado de template 000-default-balancer.conf.j2 al equipo remoto
+      ansible.builtin.template:
+        src: "{{ LocalSource_000_default_balancer }}"
+        dest: /etc/apache2/sites-available/000-default.conf
+        mode: 0644
+      notify: Reinicio de servidor Apache
+
+  handlers:
+    - name: Reinicio de servidor Apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

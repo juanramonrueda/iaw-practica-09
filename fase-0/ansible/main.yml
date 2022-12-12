@@ -1,0 +1,13 @@
+---
+
+- name: Importación de playbook para instalar la pila LAMP
+  ansible.builtin.import_playbook:
+    playbooks/install_lamp.yml
+
+- name: Importación de playbook para preparar HTTPS
+  ansible.builtin.import_playbook:
+    playbooks/https.yml
+
+- name: Importación de playbook para el despliegue de WordPress
+  ansible.builtin.import_playbook:
+    playbooks/deploy_wordpress.yml

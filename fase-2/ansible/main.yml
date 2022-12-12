@@ -1,0 +1,33 @@
+---
+
+- name: Ejecución del playbook de instalación del servidor NFS
+  ansible.builtin.import_playbook:
+    playbooks/install_nfs_server.yml
+
+- name: Ejecución del playbook de despliegue de WordPress en el servidor NFS
+  ansible.builtin.import_playbook:
+    playbooks/deploy_wordpress.yml
+
+- name: Ejecución del playbook de despliegue del balanceador de carga
+  ansible.builtin.import_playbook:
+    playbooks/deploy_balancer.yml
+
+- name: Ejecución del playbook de obtención del certificado de Let's Encrypt
+  ansible.builtin.import_playbook:
+    playbooks/https.yml
+
+- name: Ejecución del playbook de preparación de los equipos frontend
+  ansible.builtin.import_playbook:
+    playbooks/install_frontend.yml
+
+- name: Ejecución del playbook de instalación de cliente NFS y conexión con el servidor
+  ansible.builtin.import_playbook:
+    playbooks/install_nfs_client.yml
+
+- name: Ejecución del playbook de preparación del equipo backend
+  ansible.builtin.import_playbook:
+    playbooks/install_backend.yml
+
+- name: Ejecución del playbook de creación de la base de datos con usuario y contraseña
+  ansible.builtin.import_playbook:
+    playbooks/deploy_backend.yml

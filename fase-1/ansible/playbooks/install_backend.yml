@@ -1,0 +1,28 @@
+---
+- name: Instalación de MySQL Server y cambio de Bind-Address
+  hosts: backend
+  become: true
+
+  tasks:
+    - name: Actualización de los repositorios y de los programas instalados
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+
+    - name: Instalación de MySQL Server
+      ansible.builtin.apt:
+        name: mysql-server
+        state: present
+
+    - name: Cambio de Bind-Address para conectar con el equipo frontend
+      ansible.builtin.replace:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: 127.0.0.1
+        replace: 0.0.0.0
+      notify: Reiniciar servidor MySQL
+
+  handlers:
+    - name: Reiniciar servidor MySQL
+      ansible.builtin.service:
+        name: mysql
+        state: restarted

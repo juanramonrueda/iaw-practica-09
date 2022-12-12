@@ -1,0 +1,21 @@
+---
+
+- name: Importación del playbook de instalación para el equipo frontend
+  ansible.builtin.import_playbook:
+    playbooks/install_frontend.yml
+
+- name: Importación del playbook de instalación para el equipo backend
+  ansible.builtin.import_playbook:
+    playbooks/install_backend.yml
+
+- name: Importación del playbook de obtención del certificado de Let's Encrypt
+  ansible.builtin.import_playbook:
+    playbooks/https.yml
+
+- name: Importación del playbook para el despliegue en el equipo frontend
+  ansible.builtin.import_playbook:
+    playbooks/deploy_frontend.yml
+
+- name: Importación del playbook para el despliegue en el equipo backend
+  ansible.builtin.import_playbook:
+    playbooks/deploy_backend.yml

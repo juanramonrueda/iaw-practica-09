@@ -1,0 +1,22 @@
+---
+- name: Instalación de cliente NFS para conectar con el servidor NFS
+  hosts: frontend_nfs_client
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Instalación de NFS cliente
+      ansible.builtin.apt:
+        name: nfs-common
+        state: present
+
+    - name: Montado del directorio compartido del servidor NFS en los clientes
+      ansible.posix.mount:
+        path: /var/www/html
+        src: "{{ Private_IP_NFS_Server }}:/var/www/html"
+        fstype: nfs
+        state: mounted
+        opts: auto,nofail,noatime,nolock,intr,tcp,actimeo=1800

@@ -1,0 +1,48 @@
+---
+- name: Instalación de Apache, PHP, dos módulos de PHP y habilitación de módulo para Apache en los equipos frontend
+  hosts: frontend_nfs_client
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Actualización de los repositorios y los programas instalados
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+
+    - name: Instalación de Apache
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: Instalación de PHP y módulos para conectar con MySQL y Apache
+      ansible.builtin.apt:
+        name: "{{ PHP_Packages }}"
+        state: present
+
+    - name: Copiado de template 000-default-frontend.conf.j2 a los equipos remotos
+      ansible.builtin.template:
+        src: "{{ LocalSource_000_default_frontend }}"
+        dest: /etc/apache2/sites-available/000-default.conf
+        mode: 0644
+
+    - name: Copiado de template dir.conf.j2 a los equipos remotos
+      ansible.builtin.template:
+        src: "{{ LocalSource_dir }}"
+        dest: /etc/apache2/mods-available/dir.conf
+        mode: 0644
+
+    - name: Habilitación del módulo rewrite para WordPress
+      community.general.apache2_module:
+        name: rewrite
+        state: present
+      notify: Reiniciar servidor Apache
+
+  handlers:
+    - name: Reiniciar servidor Apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

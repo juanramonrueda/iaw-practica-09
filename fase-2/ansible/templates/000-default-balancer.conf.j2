@@ -1,0 +1,11 @@
+<VirtualHost *:80>
+    <Proxy balancer://cluster-frontend>
+        # Frontend 1
+        BalancerMember http://{{ IP_HTTP_Server_1 }}
+
+        # Frontend 2
+        BalancerMember http://{{ IP_HTTP_Server_2 }}
+    </Proxy>
+
+    ProxyPass / balancer://cluster-frontend/
+</VirtualHost>

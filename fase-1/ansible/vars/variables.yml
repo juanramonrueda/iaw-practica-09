@@ -1,0 +1,51 @@
+---
+
+#-----------------------------------------------------------------------------------------------
+# Variables para la obtención del certificado de Let's Encrypt para TLS
+
+Certbot_Email: tetz_dqhwr17@yutep.com
+Certbot_Domain: practica09iawjrrl.ddns.net
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo 000-default.conf
+
+# Variable de ruta local del archivo
+LocalSource_000_default: ../templates/000-default.conf.j2
+
+# Variable de cambio del contenido del archivo
+DocumentRoot_directory: /var/www/html
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo dir.conf
+
+# Variable de ruta local del archivo
+LocalSource_dir: ../templates/dir.conf.j2
+
+# Variable de cambio del contenido del archivo
+Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+
+
+#-----------------------------------------------------------------------------------------------
+# Lista de paquetes de PHP para instalar
+
+PHP_Packages:
+  - php
+  - libapache2-mod-php
+  - php-mysql
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para establecer la base de datos, el usuario y su contraseña y la localización
+
+DB_Name: wordpress_db
+DB_User: wordpress_user
+DB_Password: wordpress_pass
+DB_Host: 172.31.66.200
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para la personalización de la URL de WordPress
+WP_Home: https://practica09iawjrrl.ddns.net
+WP_SiteURL: https://practica09iawjrrl.ddns.net/wordpress

@@ -1,0 +1,53 @@
+---
+- name: Playbook para el despliegue de la pila LAMP
+  hosts: wordpress
+  become: true
+
+  tasks:
+    - name: Inclusión de variables para los templates
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Actualización de los repositorios y de los programas instalados
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+
+    - name: Instalación del servidor web Apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: Instalación del servidor de bases de datos
+      ansible.builtin.apt:
+        name: mysql-server
+        state: present
+
+    - name: Instalación de PHP y módulos para conectar con la base de datos y Apache2
+      ansible.builtin.apt:
+        name: "{{ PHP_Packages }}"
+        state: present
+
+    - name: Copiado del template 000-default.conf.j2 a la ruta /etc/apache2/sites-available
+      ansible.builtin.template:
+        src: "{{ LocalSource_000_default }}"
+        dest: /etc/apache2/sites-available/000-default.conf
+        mode: 0644
+
+    - name: Copiado del template dir.conf.j2 a la ruta /etc/apache2/mods-available
+      ansible.builtin.template:
+        src: "{{ LocalSource_dir }}"
+        dest: /etc/apache2/mods-available/dir.conf
+        mode: 0644
+
+    - name: Habilitación del módulo rewrite de Apache2
+      community.general.apache2_module:
+        name: rewrite
+        state: present
+      notify: Reiniciar servidor Apache2
+
+  handlers:
+    - name: Reiniciar servidor Apache2
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

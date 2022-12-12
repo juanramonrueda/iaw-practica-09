@@ -1,0 +1,98 @@
+---
+- name: Despliegue de WordPress en el equipo frontend
+  hosts: frontend
+  become: true
+
+  tasks:
+    - name: Inclusión de archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Instalación de Unzip
+      ansible.builtin.apt:
+        name: unzip
+        state: present
+
+    - name: Descarga del código fuente de WordPress
+      ansible.builtin.get_url:
+        url: https://wordpress.org/latest.zip
+        dest: /tmp/wordpress.zip
+        mode: 0664
+
+    - name: Descompresión de la descarga de WordPress
+      ansible.builtin.unarchive:
+        src: /tmp/wordpress.zip
+        dest: /var/www/html
+        remote_src: true
+
+    - name: Borrado del archivo comprimido de WordPress
+      ansible.builtin.file:
+        path: /tmp/wordpress.zip
+        state: absent
+
+    - name: Copiado de archivo wp-config-sample.php a wp-config.php
+      ansible.builtin.copy:
+        src: /var/www/html/wordpress/wp-config-sample.php
+        dest: /var/www/html/wordpress/wp-config.php
+        mode: 0644
+        remote_src: true
+
+    - name: Modificación del archivo wp-config.php para especificar la base de datos
+      ansible.builtin.replace:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: database_name_here
+        replace: "{{ DB_Name }}"
+
+    - name: Modificación del archivo wp-config.php para especificar el usuario de la base de datos
+      ansible.builtin.replace:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: username_here
+        replace: "{{ DB_User }}"
+
+    - name: Modificación del archivo wp-config.php para especificar la contraseña del usuario
+      ansible.builtin.replace:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: password_here
+        replace: "{{ DB_Password }}"
+
+    - name: Modificación del archivo wp-config.php para especificar el servidor de la base de datos
+      ansible.builtin.replace:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: localhost
+        replace: "{{ DB_Host }}"
+
+    - name: Copiado del archivo index.php de html/wordpress a html
+      ansible.builtin.copy:
+        src: /var/www/html/wordpress/index.php
+        dest: /var/www/html/index.php
+        mode: 0644
+        remote_src: true
+
+    - name: Modificación del archivo index.php para la redirección a WordPress
+      ansible.builtin.replace:
+        path: /var/www/html/index.php
+        regexp: wp-blog-header.php
+        replace: wordpress/wp-blog-header.php
+
+    - name: Modificación del archivo wp-config.php para la personalización de la URL
+      ansible.builtin.blockinfile:
+        path: /var/www/html/wordpress/wp-config.php
+        insertafter: DB_COLLATE
+        block: |
+          define('WP_HOME', '{{ WP_Home }}');
+          define('WP_SITEURL', '{{ WP_SiteURL }}');
+
+    - name: Cambio de propietario y grupo para /var/www/html
+      ansible.builtin.file:
+        path: /var/www/html
+        owner: www-data
+        group: www-data
+        recurse: true
+
+      notify: Reinicio de Apache2
+
+  handlers:
+    - name: Reinicio de Apache2
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

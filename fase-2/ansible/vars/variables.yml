@@ -1,0 +1,89 @@
+---
+
+#-----------------------------------------------------------------------------------------------
+# Variables para la obtención del certificado de Let's Encrypt para TLS
+
+Certbot_Email: tetz_dqhwr17@yutep.com
+Certbot_Domain: practica09iawjrrl.ddns.net
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo 000-default.conf del Balanceador de carga
+
+# Variable de ruta local del archivo
+LocalSource_000_default_balancer: ../templates/000-default-balancer.conf.j2
+
+# Variables de cambio del contenido del archivo
+IP_HTTP_Server_1: 172.31.77.79
+
+IP_HTTP_Server_2: 172.31.78.66
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo 000-default.conf de los frontend
+
+# Variable de ruta local del archivo
+LocalSource_000_default_frontend: ../templates/000-default-frontend.conf.j2
+
+# Varaible de cambio del contenido del archivo
+DocumentRoot_directory: /var/www/html
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo dir.conf
+
+# Variable de ruta local del archivo
+LocalSource_dir: ../templates/dir.conf.j2
+
+# Variable de cambio del contenido del archivo
+Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para el archivo exports.j2
+
+# Variable de ruta local del archivo
+LocalSource_exports: ../templates/exports.j2
+
+# Directorio a compartir por el servidor NFS
+Shared_directory: /var/www/html
+
+# Variables de cambio del contenido del archivo
+Range_AWS_Private_IP: 172.31.0.0/16
+
+# Opciones para el servidor NFS
+NFS_Options: rw,sync,no_root_squash,no_subtree_check
+
+
+#-----------------------------------------------------------------------------------------------
+# Lista de paquetes de PHP para instalar
+
+PHP_Packages:
+  - php
+  - libapache2-mod-php
+  - php-mysql
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para establecer la base de datos, el usuario y su contraseña y la localización
+
+DB_Name: wordpress_db
+DB_User: wordpress_user
+DB_Password: wordpress_pass
+DB_Host: 172.31.76.41
+
+
+#-----------------------------------------------------------------------------------------------
+# Variables para la personalización de la URL de WordPress
+
+# Personalización de la URL para no referenciar al directorio de instalación
+WP_Home: https://practica09iawjrrl.ddns.net
+
+# Ruta interna de los archivos de WordPress
+WP_SiteURL: https://practica09iawjrrl.ddns.net/wordpress
+
+
+#-----------------------------------------------------------------------------------------------
+# Conexión con el servidor NFS
+
+Private_IP_NFS_Server: 172.31.65.63

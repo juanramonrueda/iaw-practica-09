@@ -1,0 +1,35 @@
+---
+- name: Despliegue de la base de datos para WordPress en el equipo backend
+  hosts: backend
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Instalación del gestor de paquetes de Python3
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+
+    - name: Instalación del módulo PyMySQL mediante el gestor de paquetes de Python3 para conectar conectar con el socket
+      ansible.builtin.pip:
+        name: pymysql
+        state: present
+
+    - name: Creación de la base de datos usando el socket de PyMySQL
+      community.mysql.mysql_db:
+        name: "{{ DB_Name }}"
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Creación del usuario con la contraseña para la base de datos
+      no_log: true
+      community.mysql.mysql_user:
+        name: "{{ DB_User }}"
+        host: '%'
+        password: "{{ DB_Password }}"
+        priv: "{{ DB_Name }}.*:ALL"
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock

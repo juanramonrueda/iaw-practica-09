@@ -1,0 +1,25 @@
+---
+- name: Descarga de Certbot mediante Snap y obtención de certificado de Let's Encrypt
+  hosts: balancer
+  become: true
+
+  tasks:
+    - name: Inclusión del archivo de variables
+      ansible.builtin.include_vars:
+        ../vars/variables.yml
+
+    - name: Desinstalación de la instalación previa de Certbot que viene con el sistema operativo
+      ansible.builtin.apt:
+        name: certbot
+        state: absent
+
+    - name: Instalación de Certbot mediante Snap
+      community.general.snap:
+        name: certbot
+        classic: true
+        state: present
+
+    - name: Descarga de certificado para TLS / SSL
+      ansible.builtin.command: certbot --apache -m "{{ Certbot_Email }}" --agree-tos --no-eff-email -d "{{ Certbot_Domain }}"
+      register: realizar_cambio
+      changed_when: realizar_cambio.rc == 0
