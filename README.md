@@ -20,119 +20,173 @@ Los requisitos para las tres fases con una instancia **Ubuntu Server 22.04** o *
 
 Prepararemos la siguiente estructura de directorios y archivos:
 
-+ **ansible**
++ **fase-0**
 
-    + **fase-0**
+    + **ansible**
 
         + **playbooks**
+
             + **deploy_wordpress.yml**
+
             + **https.yml**
+
             + **install_lamp.yml**
 
         + **templates**
+
             + **000-default.conf.j2**
+
             + **dir.conf.j2**
 
         + **vars**
+
             + **variables.yml**
 
         + **inventario** --> Archivo
 
         + **main.yml**
-    
-    + **fase-1**
+
+    + **scripting**
+
+        + **conf**
+
+            + **000-default.conf**
+
+            + **dir.conf**
+
+        + **scripts**
+
+            + **config-https.sh**
+
+            + **deploy_wordpress.sh**
+
+            + **install_lamp.sh**
+
+            + **variables.sh**
+
++ **fase-1**
+
+    + **ansible**
 
         + **playbooks**
+
             + **deploy_backend.yml**
+
             + **deploy_wordpress.yml**
+
             + **https.yml**
+
             + **install_backend.yml**
+
             + **install_frontend.yml**
 
         + **templates**
+
             + **000-default.conf.j2**
+
             + **dir.conf.j2**
 
         + **vars**
+
             + **variables.yml**
 
         + **inventario** --> Archivo
 
         + **main.yml**
 
-    + **fase-2**
+    + **scripting**
+
+        + **conf**
+
+            + **000-default.conf**
+
+            + **dir.conf**
+
+        + **scripts**
+
+            + **deploy_backend.sh**
+
+            + **deploy_wordpress.sh**
+
+            + **https_frontend.sh**
+
+            + **install_backend.sh**
+
+            + **install_frontend.sh**
+
+            + **variables.sh**
+
++ **fase-2**
+
+    + **ansible**
 
         + **playbooks**
+
             + **deploy_backend.yml**
+
             + **deploy_balancer.yml**
+
             + **deploy_wordpress.yml**
+
             + **https.yml**
+
             + **install_backend.yml**
+
             + **install_frontend.yml**
+
             + **install_nfs_client.yml**
+
             + **install_nfs_server.yml**
 
         + **templates**
+
             + **000-default-balancer.conf.j2**
+
             + **000-default-frontend.conf.j2**
+
             + **dir.conf.j2**
+
             + **exports.j2**
 
         + **vars**
+
             + **variables.yml**
 
-        + **inventario** --> Archivo
+        + **inventario**
 
         + **main.yml**
 
-
-+ **scripting**
-    
-    + **fase-0**
+    + **scripting**
 
         + **conf**
-            + **000-default.conf**
-            + **dir.conf**
-        
-        + **scripts**
-            + **config-https.sh**
-            + **deploy_wordpress.sh**
-            + **install_lamp.sh**
-            + **variables.sh**
 
-    + **fase-1**
-
-        + **conf**
-            + **000-default.conf**
-            + **dir.conf**
-
-        + **scripts**
-            + **deploy_backend.sh**
-            + **deploy_wordpress.sh**
-            + **https_frontend.sh**
-            + **install_backend.sh**
-            + **install_frontend.sh**
-            + **variables.sh**
-
-    + **fase-2**
-
-        + **conf**
             + **000-default-balancer.conf**
+
             + **000-default-frontend.conf**
+
             + **dir.conf**
-            + **exports** --> Archivo
+
+            + **exports**
 
         + **scripts**
-            + **deploy_backend.sh**
-            + **deploy_balancer.sh**
-            + **deploy_wordpress.sh**
-            + **https_balancer.sh**
-            + **install_backend.sh**
-            + **install_frontend.sh**
-            + **install_nfs_client.sh**
-            + **install_nfs_server.sh**
-            + **variables.sh**
 
+            + **deploy_backend.sh**
+
+            + **deploy_balancer.sh**
+
+            + **deploy_wordpress.sh**
+
+            + **https_balancer.sh**
+
+            + **install_backend.sh**
+
+            + **install_frontend.sh**
+
+            + **install_nfs_client.sh**
+
+            + **install_nfs_server.sh**
+
+            + **variables.sh**
 
 Crearemos un repositorio para la práctica.
 ## fase-0
