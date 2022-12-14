@@ -16,7 +16,7 @@
     - name: Montado del directorio compartido del servidor NFS en los clientes
       ansible.posix.mount:
         path: /var/www/html
-        src: "{{ Private_IP_NFS_Server }}:/var/www/html"
+        src: "{{ NFS_Server.Private_IP_NFS_Server }}:/var/www/html"
         fstype: nfs
         state: mounted
         opts: auto,nofail,noatime,nolock,intr,tcp,actimeo=1800

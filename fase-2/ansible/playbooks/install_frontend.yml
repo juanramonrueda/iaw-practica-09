@@ -20,18 +20,18 @@
 
     - name: Instalación de PHP y módulos para conectar con MySQL y Apache
       ansible.builtin.apt:
-        name: "{{ PHP_Packages }}"
+        name: "{{ Frontend.PHP_Packages }}"
         state: present
 
     - name: Copiado de template 000-default-frontend.conf.j2 a los equipos remotos
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default_frontend }}"
+        src: "{{ Frontend.Local_Source_000 }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
 
     - name: Copiado de template dir.conf.j2 a los equipos remotos
       ansible.builtin.template:
-        src: "{{ LocalSource_dir }}"
+        src: "{{ Frontend.Local_Source_dir }}"
         dest: /etc/apache2/mods-available/dir.conf
         mode: 0644
 

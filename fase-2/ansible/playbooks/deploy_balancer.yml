@@ -70,7 +70,7 @@
 
     - name: Copiado de template 000-default-balancer.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default_balancer }}"
+        src: "{{ Balancer.Local_Source }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
       notify: Reinicio de servidor Apache

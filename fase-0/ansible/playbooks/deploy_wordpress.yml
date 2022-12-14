@@ -41,25 +41,25 @@
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: database_name_here
-        replace: "{{ DB_Name }}"
+        replace: "{{ Database.Name }}"
 
     - name: Modificación del archivo wp-config.php para especificar el usuario de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: username_here
-        replace: "{{ DB_User }}"
+        replace: "{{ Database.User }}"
 
     - name: Modificación del archivo wp-config.php para especificar la contraseña del usuario
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: password_here
-        replace: "{{ DB_Password }}"
+        replace: "{{ Database.Password }}"
 
     - name: Modificación del archivo wp-config.php para especificar el servidor de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: localhost
-        replace: "{{ DB_Host }}"
+        replace: "{{ Database.Host }}"
 
     - name: Instalación del gestor de paquetes de Python3
       ansible.builtin.apt:
@@ -73,17 +73,17 @@
 
     - name: Creación de la base de datos usando el socket de PyMySQL
       community.mysql.mysql_db:
-        name: "{{ DB_Name }}"
+        name: "{{ Database.Name }}"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
     - name: Creación del usuario con la contraseña para la base de datos
       no_log: true
       community.mysql.mysql_user:
-        name: "{{ DB_User }}"
+        name: "{{ Database.User }}"
         host: '%'
-        password: "{{ DB_Password }}"
-        priv: "{{ DB_Name }}.*:ALL"
+        password: "{{ Database.Password }}"
+        priv: "{{ Database.Name }}.*:ALL"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
@@ -105,8 +105,8 @@
         path: /var/www/html/wordpress/wp-config.php
         insertafter: DB_COLLATE
         block: |
-          define('WP_HOME', '{{ WP_Home }}');
-          define('WP_SITEURL', '{{ WP_SiteURL }}');
+          define('WP_HOME', '{{ WordPress.Home }}');
+          define('WP_SITEURL', '{{ WordPress.SiteURL }}');
 
     - name: Cambio de propietario y grupo para /var/www/html
       ansible.builtin.file:

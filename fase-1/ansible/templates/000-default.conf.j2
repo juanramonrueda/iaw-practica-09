@@ -1,11 +1,11 @@
 <VirtualHost *:80>
     #ServerName www.example.org
     ServerAdmin webmaster@localhost
-    DocumentRoot {{ DocumentRoot_directory }}
+    DocumentRoot {{ Template_000_default.DocumentRoot }}
 
     #LogLevel info ssl:warm
 
-    <Directory "{{ DocumentRoot_directory }}">
+    <Directory "{{ Template_000_default.DocumentRoot }}">
         AllowOverride All
     </Directory>
 

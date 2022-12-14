@@ -1,89 +1,81 @@
 ---
 
-#-----------------------------------------------------------------------------------------------
-# Variables para la obtención del certificado de Let's Encrypt para TLS
+#------------------------------------------------------------------------------------------------------
+# Variables para el balanceador de carga
 
-Certbot_Email: tetz_dqhwr17@yutep.com
-Certbot_Domain: practica09iawjrrl.ddns.net
+Balancer:
+  # Variable de ruta local del template 000-default-balancer.conf.j2
+  Local_Source: ../templates/000-default-balancer.conf.j2
 
+  # Variables de cambio del contenido del template 000-default-balancer.conf.j2
+  IP_HTTP_Server_1: 172.31.77.79
+  IP_HTTP_Server_2: 172.31.78.66
 
-#-----------------------------------------------------------------------------------------------
-# Variables para el archivo 000-default.conf del Balanceador de carga
-
-# Variable de ruta local del archivo
-LocalSource_000_default_balancer: ../templates/000-default-balancer.conf.j2
-
-# Variables de cambio del contenido del archivo
-IP_HTTP_Server_1: 172.31.77.79
-
-IP_HTTP_Server_2: 172.31.78.66
+  # Variables para obtener el certificado de Let's Encrypt
+  Certbot_Domain: practica09iawjrrl.ddns.net
+  Certbot_Email: tetz_dqhwr17@yutep.com
 
 
-#-----------------------------------------------------------------------------------------------
-# Variables para el archivo 000-default.conf de los frontend
+#------------------------------------------------------------------------------------------------------
+# Variables para los frontend
 
-# Variable de ruta local del archivo
-LocalSource_000_default_frontend: ../templates/000-default-frontend.conf.j2
+Frontend:
 
-# Varaible de cambio del contenido del archivo
-DocumentRoot_directory: /var/www/html
+  # Variable de ruta local del template 000-default-frontend.conf.j2
+  Local_Source_000: ../templates/000-default-frontend.conf.j2
 
+  # Variable de cambio del contenido del template 000-default-frontend.conf.j2
+  DocumentRoot: /var/www/html
 
-#-----------------------------------------------------------------------------------------------
-# Variables para el archivo dir.conf
+  # Lista de paquetes de PHP para instalar
+  PHP_Packages:
+    - php
+    - libapache2-mod-php
+    - php-mysql
 
-# Variable de ruta local del archivo
-LocalSource_dir: ../templates/dir.conf.j2
+  # Variable de ruta local del template dir.conf.j2 
+  Local_Source_dir: ../templates/dir.conf.j2
 
-# Variable de cambio del contenido del archivo
-Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
-
-
-#-----------------------------------------------------------------------------------------------
-# Variables para el archivo exports.j2
-
-# Variable de ruta local del archivo
-LocalSource_exports: ../templates/exports.j2
-
-# Directorio a compartir por el servidor NFS
-Shared_directory: /var/www/html
-
-# Variables de cambio del contenido del archivo
-Range_AWS_Private_IP: 172.31.0.0/16
-
-# Opciones para el servidor NFS
-NFS_Options: rw,sync,no_root_squash,no_subtree_check
+  # Variable de cambio del contenido del template dir.conf.j2
+  Directory_index_dir: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 
 
-#-----------------------------------------------------------------------------------------------
-# Lista de paquetes de PHP para instalar
+#------------------------------------------------------------------------------------------------------
+# Variables para NFS Server
 
-PHP_Packages:
-  - php
-  - libapache2-mod-php
-  - php-mysql
+NFS_Server:
+  # Variable de ruta local del template exports.j2
+  Local_Source_exports: ../templates/exports.j2
+
+  # Directorio a compartir por el servidor NFS para el template exports.j2
+  Shared_directory_exports: /var/www/html
+
+  # Variables de cambio del contenido del template exports.j2
+  Range_AWS_Private_IP_exports: 172.31.0.0/16
+
+  # Opciones para el servidor NFS del template exports.j2
+  NFS_Options_exports: rw,sync,no_root_squash,no_subtree_check
+
+  # Conexión con el servidor NFS para el montaje y el archivo fstab
+  Private_IP_NFS_Server: 172.31.65.63
 
 
-#-----------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
 # Variables para establecer la base de datos, el usuario y su contraseña y la localización
 
-DB_Name: wordpress_db
-DB_User: wordpress_user
-DB_Password: wordpress_pass
-DB_Host: 172.31.76.41
+Backend_Database:
+  Name: wordpress_db
+  User: wordpress_user
+  Password: wordpress_pass
+  Host: 172.31.76.41
 
 
-#-----------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
 # Variables para la personalización de la URL de WordPress
 
-# Personalización de la URL para no referenciar al directorio de instalación
-WP_Home: https://practica09iawjrrl.ddns.net
+WordPress:
+  # Personalización de la URL para no referenciar al directorio de instalación
+  Home: https://practica09iawjrrl.ddns.net
 
-# Ruta interna de los archivos de WordPress
-WP_SiteURL: https://practica09iawjrrl.ddns.net/wordpress
-
-
-#-----------------------------------------------------------------------------------------------
-# Conexión con el servidor NFS
-
-Private_IP_NFS_Server: 172.31.65.63
+  # Ruta interna de los archivos de WordPress
+  SiteURL: https://practica09iawjrrl.ddns.net/wordpress

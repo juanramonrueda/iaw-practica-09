@@ -3,28 +3,31 @@
 #-----------------------------------------------------------------------------------------------
 # Variables para la obtención del certificado de Let's Encrypt para TLS
 
-Certbot_Email: tetz_dqhwr17@yutep.com
-Certbot_Domain: practicasiaw09jrrl.ddns.net
+Cerbot:
+  Email: tetz_dqhwr17@yutep.com
+  Domain: practicasiaw09jrrl.ddns.net
 
 
 #-----------------------------------------------------------------------------------------------
 # Variables para el archivo 000-default.conf
 
+Template_000_default:
 # Variable de ruta local del archivo
-LocalSource_000_default: ../templates/000-default.conf.j2
+  Local_Source: ../templates/000-default.conf.j2
 
 # Variable de cambio del contenido del archivo
-DocumentRoot_directory: /var/www/html
+  DocumentRoot: /var/www/html
 
 
 #-----------------------------------------------------------------------------------------------
 # Variables para el archivo dir.conf
 
+Template_dir:
 # Variable de ruta local del archivo
-LocalSource_dir: ../templates/dir.conf.j2
+  Local_Source: ../templates/dir.conf.j2
 
 # Variable de cambio del contenido del archivo
-Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+  Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 
 
 #-----------------------------------------------------------------------------------------------
@@ -39,13 +42,16 @@ PHP_Packages:
 #-----------------------------------------------------------------------------------------------
 # Variables para establecer la base de datos, el usuario y su contraseña y la localización
 
-DB_Name: wordpress_db
-DB_User: wordpress_user
-DB_Password: wordpress_pass
-DB_Host: localhost
+Database:
+  Name: wordpress_db
+  User: wordpress_user
+  Password: wordpress_pass
+  Host: localhost
 
 
 #-----------------------------------------------------------------------------------------------
 # Variables para la personalización de la URL de WordPress
-WP_Home: https://practicasiaw09jrrl.ddns.net
-WP_SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
+
+WordPress:
+  Home: https://practicasiaw09jrrl.ddns.net
+  SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress

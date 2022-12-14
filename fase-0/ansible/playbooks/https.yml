@@ -20,6 +20,7 @@
         state: present
 
     - name: Descarga de certificado para TLS / SSL
-      ansible.builtin.command: certbot --apache -m "{{ Certbot_Email }}" --agree-tos --no-eff-email -d "{{ Certbot_Domain }}"
+      ansible.builtin.command: certbot --apache -m "{{ Certbot.Email }}" --agree-tos --no-eff-email -d "{{ Certbot.Domain }}"
       register: realizar_cambio
       changed_when: realizar_cambio.rc == 0
+      when: instalar_certbot = true

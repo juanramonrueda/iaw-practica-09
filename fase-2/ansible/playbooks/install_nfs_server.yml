@@ -28,7 +28,7 @@
 
     - name: Copiado de template exports.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_exports }}"
+        src: "{{ NFS_Server.Local_Source_exports }}"
         dest: /etc/exports
         mode: 0644
 

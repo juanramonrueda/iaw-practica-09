@@ -41,25 +41,25 @@
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: database_name_here
-        replace: "{{ DB_Name }}"
+        replace: "{{ Database.Name }}"
 
     - name: Modificación del archivo wp-config.php para especificar el usuario de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: username_here
-        replace: "{{ DB_User }}"
+        replace: "{{ Database.User }}"
 
     - name: Modificación del archivo wp-config.php para especificar la contraseña del usuario
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: password_here
-        replace: "{{ DB_Password }}"
+        replace: "{{ Database.Password }}"
 
     - name: Modificación del archivo wp-config.php para especificar el servidor de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: localhost
-        replace: "{{ DB_Host }}"
+        replace: "{{ Database.Host }}"
 
     - name: Copiado del archivo index.php de html/wordpress a html
       ansible.builtin.copy:
@@ -79,8 +79,8 @@
         path: /var/www/html/wordpress/wp-config.php
         insertafter: DB_COLLATE
         block: |
-          define('WP_HOME', '{{ WP_Home }}');
-          define('WP_SITEURL', '{{ WP_SiteURL }}');
+          define('WP_HOME', '{{ WordPress.Home }}');
+          define('WP.SITEURL', '{{ WordPress.SiteURL }}');
 
     - name: Cambio de propietario y grupo para /var/www/html
       ansible.builtin.file:

@@ -25,13 +25,13 @@
 
     - name: Copiado de template 000-default.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default }}"
+        src: "{{ Template_000_default.Local_Source }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
 
     - name: Copiado de template dir.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_dir }}"
+        src: "{{ Template_dir.Local_Source }}"
         dest: /etc/apache2/mods-available/dir.conf
         mode: 0644
 

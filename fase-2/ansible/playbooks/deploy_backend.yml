@@ -20,16 +20,16 @@
 
     - name: Creación de la base de datos usando el socket de PyMySQL
       community.mysql.mysql_db:
-        name: "{{ DB_Name }}"
+        name: "{{ Backend_Database.Name }}"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
     - name: Creación del usuario con la contraseña para la base de datos
       no_log: true
       community.mysql.mysql_user:
-        name: "{{ DB_User }}"
+        name: "{{ Backend_Database.User }}"
         host: '%'
-        password: "{{ DB_Password }}"
-        priv: "{{ DB_Name }}.*:ALL"
+        password: "{{ Backend_Database.Password }}"
+        priv: "{{ Backend_Database.Name }}.*:ALL"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
