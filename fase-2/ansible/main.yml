@@ -15,6 +15,7 @@
 - name: Ejecución del playbook de obtención del certificado de Let's Encrypt
   ansible.builtin.import_playbook:
     playbooks/https.yml
+  when: certificado | d(False) == "descargar"
 
 - name: Ejecución del playbook de preparación de los equipos frontend
   ansible.builtin.import_playbook:

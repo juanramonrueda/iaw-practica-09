@@ -23,4 +23,3 @@
       ansible.builtin.command: certbot --apache -m "{{ Balancer.Certbot_Email }}" --agree-tos --no-eff-email -d "{{ Balancer.Certbot_Domain }}"
       register: realizar_cambio
       changed_when: realizar_cambio.rc == 0
-      when: certificado | d(False) == "descargar"
