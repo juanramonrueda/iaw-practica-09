@@ -359,19 +359,58 @@ Por último, **modificaremos el index.php para hacer referencia a la localizaci�
 
 Realizaremos la misma parte mediante ansible, de forma que modificaremos lo realizado mediante scripting para ajustarlo al uso de Ansible.
 
+#### variables.yml
+
+En este archivo tendremos las variables para usarlas en los playbooks que las necesiten.
+
+```yml
+Certbot:
+  Email: tetz_dqhwr17@yutep.com
+  Domain: practicasiaw09jrrl.ddns.net
+
+Template_000_default:
+  Local_Source: ../templates/000-default.conf.j2
+  DocumentRoot: /var/www/html
+
+Template_dir:
+  Local_Source: ../templates/dir.conf.j2
+  Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+
+PHP_Packages:
+  - php
+  - libapache2-mod-php
+  - php-mysql
+
+Database:
+  Name: wordpress_db
+  User: wordpress_user
+  Password: wordpress_pass
+  Host: localhost
+
+WordPress:
+  Home: http://practicasiaw09jrrl.ddns.net
+  SiteURL: http://practicasiaw09jrrl.ddns.net/wordpress
+```
+
+Introduciremos las variables que necesitamos dentro de otra variable que será la global para tenerlas agrupadas por función o máquina dónde se ejecutarán. De esta forma evitamos tener variables sueltas y evitamos el caos resultante.
+
+Las dos primeras variables nos servirán para la obtención del certificado de Let's Encrypt y poder usar HTTPS, la tercera indica la ruta local del template 000-default.conf.j2 y la cuarta el contenido de la variable de dicho template. La quinta indica la ruta local del template dir.conf.j2 y la sexta el contenido de la variable de dicho template, en la séptima variable indicamos los paquetes de PHP que hay que instalar.
+
+Las siguientes cuatro variables son para indicar la base de datos, el usuario y su contraseña y la localización de la base de datos. Las dos últimas son para la personalización de la URL de WordPress y la ruta interna de los archivos de WordPress en el equipo.
+
 #### 000-default.conf.j2
 
-Al igual que hicimos con los scripts, crearemos una plantilla o template para copiar el template en el equipo local al equipo remoto y haremos unas modificaciones mediante variables.
+Al igual que hicimos con los scripts, crearemos una plantilla o template para copiar el template en el equipo local al equipo remoto y haremos unas modificaciones mediante variables, que en este caso, **tenemos que hacer referencia a la variable global seguido de un punto (o dot) seguido de la variable que tiene el contenido que necesitamos**.
 
 ```j2
 <VirtualHost *:80>
     #ServerName www.example.org
     ServerAdmin webmaster@localhost
-    DocumentRoot {{ DocumentRoot_directory }}
+    DocumentRoot {{ Template_000_default.DocumentRoot }}
 
     #LogLevel info ssl:warm
 
-    <Directory "{{ DocumentRoot_directory }}">
+    <Directory "{{ Template_000_default.DocumentRoot }}">
         AllowOverride All
     </Directory>
 
@@ -388,41 +427,9 @@ Al igual que con el scripting, priorizaremos las extensiones de los archivos ind
 
 ```j2
 <IfModule mod_dir.c>
-        {{ Directory_index }}
+        {{ Template_dir.Directory_index }}
 </IfModule>
 ```
-
-#### variables.yml
-
-En este archivo tendremos las variables para usarlas en los playbooks que las necesiten.
-
-```yml
-Certbot_Email: tetz_dqhwr17@yutep.com
-Certbot_Domain: practicasiaw09jrrl.ddns.net
-
-LocalSource_000_default: ../templates/000-default.conf.j2
-DocumentRoot_directory: /var/www/html
-
-LocalSource_dir: ../templates/dir.conf.j2
-Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
-
-php_packages:
-  - php
-  - libapache2-mod-php
-  - php-mysql
-
-DB_Name: wordpress_db
-DB_User: wordpress_user
-DB_Password: wordpress_pass
-DB_Host: localhost
-
-WP_Home: https://practicasiaw09jrrl.ddns.net
-WP_SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
-```
-
-Las dos primeras variables nos servirán para la obtención del certificado de Let's Encrypt y poder usar HTTPS, la tercera indica la ruta local del template 000-default.conf.j2 y la cuarta el contenido de la variable de dicho template. La quinta indica la ruta local del template dir.conf.j2 y la sexta el contenido de la variable de dicho template, en la séptima variable indicamos los paquetes de PHP que hay que instalar.
-
-Las siguientes cuatro variables son para indicar la base de datos, el usuario y su contraseña y la localización de la base de datos. Las dos últimas son para la personalización de la URL de WordPress y la ruta interna de los archivos de WordPress en el equipo.
 
 #### inventario
 
@@ -479,13 +486,13 @@ Hasta aquí es la inclusión del archivo de variables en el playbook para los do
 ```yml
     - name: Copiado del template 000-default.conf.j2 a la ruta /etc/apache2/sites-available
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default }}"
+        src: "{{ Template_000_default.Local_Source }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
 
     - name: Copiado del template dir.conf.j2 a la ruta /etc/apache2/mods-available
       ansible.builtin.template:
-        src: "{{ LocalSource_dir }}"
+        src: "{{ Template_dir.Local_Source }}"
         dest: /etc/apache2/mods-available/dir.conf
         mode: 0644
 
@@ -590,25 +597,25 @@ Empezaremos incluyendo el archivo de variables en el playbook, después instalar
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: database_name_here
-        replace: "{{ DB_Name }}"
+        replace: "{{ Database.Name }}"
 
     - name: Modificación del archivo wp-config.php para especificar el usuario de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: username_here
-        replace: "{{ DB_User }}"
+        replace: "{{ Database.User }}"
 
     - name: Modificación del archivo wp-config.php para especificar la contraseña del usuario
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: password_here
-        replace: "{{ DB_Password }}"
+        replace: "{{ Database.Password }}"
 
     - name: Modificación del archivo wp-config.php para especificar el servidor de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: localhost
-        replace: "{{ DB_Host }}"
+        replace: "{{ Database.Host }}"
 ```
 
 Modificaremos el archivo wp-config.php para indicar la base de datos, el usuario de la base de datos y su contraseña, además de la conexión a la base de datos, que en este caso es localhost.
@@ -626,17 +633,17 @@ Modificaremos el archivo wp-config.php para indicar la base de datos, el usuario
 
     - name: Creación de la base de datos usando el socket de PyMySQL
       community.mysql.mysql_db:
-        name: "{{ DB_Name }}"
+        name: "{{ Database.Name }}"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
     - name: Creación del usuario con la contraseña para la base de datos
       no_log: true
       community.mysql.mysql_user:
-        name: "{{ DB_User }}"
+        name: "{{ Database.User }}"
         host: '%'
-        password: "{{ DB_Password }}"
-        priv: "{{ DB_Name }}.*:ALL"
+        password: "{{ Database.Password }}"
+        priv: "{{ Database.Name }}.*:ALL"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 ```
@@ -662,8 +669,8 @@ A continuación, crearemos la base de datos con el usuario y la contraseña, par
         path: /var/www/html/wordpress/wp-config.php
         insertafter: DB_COLLATE
         block: |
-          define('WP_HOME', '{{ WP_Home }}');
-          define('WP_SITEURL', '{{ WP_SiteURL }}');
+          define('WP_HOME', '{{ WordPress.Home }}');
+          define('WP_SITEURL', '{{ WordPress.SiteURL }}');
 
     - name: Cambio de propietario y grupo para /var/www/html
       ansible.builtin.file:
@@ -687,7 +694,7 @@ A continuación, cambiaremos el propietario y el grupo de la ruta /var/www/html 
 
 #### main.yml
 
-Este archivo será el que importará los playbooks y el que ejecutemos para realizar la instalación de la pila LAMP, la configuración para HTTPS y el despliegue de WordPress.
+Este archivo será el que importará los playbooks y el que ejecutemos para realizar la instalación de la pila LAMP, la configuración para HTTPS y el despliegue de WordPress. Usaremos tags para cada importación de playbook ya que **si queremos evitar que un playbook o playbooks se ejecuten tenemos que hacer referencia al tag o tags que no queremos que se ejecuten**, como por ejemplo el playbook https, **también podemos hacer el caso contrario de ejecutar un playbook o playbooks mediante el tag o tags**, los tags también nos permiten referenciar cada task o playbook para su identificación.
 
 ```yml
 ---
@@ -695,14 +702,17 @@ Este archivo será el que importará los playbooks y el que ejecutemos para real
 - name: Importación de playbook para instalar la pila LAMP
   ansible.builtin.import_playbook:
     playbooks/install_lamp.yml
+  tags: lamp
 
 - name: Importación de playbook para preparar HTTPS
   import_playbook:
     playbooks/https.yml
+  tags: certificado
 
 - name: Importación de playbook para el despliegue de wordpress
   ansible.builtin.import_playbook:
     playbooks/deploy_wordpress.yml
+  tags: wordpress
 ```
 
 El orden de ejecución es primero pila LAMP, **después la obtención del certificado de Let's Encrypt ya que para este playbook necesitamos tener instalado Apache** y por último el despliegue de WordPress.
@@ -724,6 +734,14 @@ Mediante scripting tenemos que **ejecutar los scripts en el siguiente orden** y 
 Mediante ansible **en la ruta dónde se encuentra el archivo inventario y main.yml**:
 
 > **ansible-playbook -i inventario main.yml**
+
+De la forma anterior con Ansible ejecutamos todos los playbooks y en el caso de que queramos saltar un playbook, como por ejemplo la instalación de Certbot mediante Snap y la descarga del certificado de Let's Encrypt, usaremos:
+
+> **ansible-playbook -i inventario main.yml --skip-tags certificado**
+
+Para el caso contrario, sólo tenemos que ejecutar:
+
+> **ansible-playbook -i inventario main.yml --tags [lamp, wordpress]**
 
 Una vez lancemos la instalación de una forma u otra, cuando termine la ejecución, accederemos a través de un navegador web a la dirección IP de la instancia o mediante el dominio que hemos asignado.
 
@@ -757,9 +775,13 @@ En el **archivo variables.sh hay una línea que tenemos que modificar**.
 
 ```bash
 DB_Host=172.31.66.200
+
+Certbot_Domain=practica09iawjrrl.ddns.net
+WP_Home=https://practica09iawjrrl.ddns.net
+WP_SiteURL=https://practica09iawjrrl.ddns.net/wordpress
 ```
 
-**En la variable DB_Host tenemos que poner la dirección IP privada de la máquina backend** ya que es la que tendrá el servidor MySQL para la base de datos con el usuario y la contraseña.
+**En la variable DB_Host tenemos que poner la dirección IP privada de la máquina backend** ya que es la que tendrá el servidor MySQL para la base de datos con el usuario y la contraseña, **también podemos modificar el dominio de las variables Certbot_Domain, WP_Home y WP_SiteURL**.
 
 #### install_frontend.sh
 
@@ -864,16 +886,17 @@ En este caso también **reutilizaremos los archivos variables.yml**, **000-defau
 
 #### variables.yml
 
-El contenido de las variables que tenemos que modificar son las siguientes:
+**Modificaremos el contenido de las siguientes variables para adecuarlo a la nueva fase, siendo opcionales tanto Domain, Home y SiteURL**.
 
 ```yml
-DB_Host: 172.31.66.200
+Host: 172.31.66.200
 
-WP_Home: https://practicasiaw09jrrl.ddns.net
-WP_SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
+Domain: practica09iawjrrl.ddns.net
+Home: https://practicasiaw09jrrl.ddns.net
+SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
 ```
 
-En la variable DB_Host tenemos que poner la dirección IP privada de la máquina que tendrá el servidor de bases de datos, en WP_Home y WP_SiteURL tendremos que cambiar la dirección IP para adecuarla a la máquina frontend.
+**En la variable Host tenemos que poner la dirección IP privada de la máquina que tendrá el servidor de bases de datos**.
 
 #### inventario
 
@@ -926,13 +949,13 @@ Al igual que hicimos con los scripts, tenemos que instalar en la máquina fronte
 
     - name: Copiado de template 000-default.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default }}"
+        src: "{{ Template_000_default.Local_Source }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
 
     - name: Copiado de template dir.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_dir }}"
+        src: "{{ Template_dir.Local_Source }}"
         dest: /etc/apache2/mods-available/dir.conf
         mode: 0644
 
@@ -990,7 +1013,7 @@ Al igual que hicimos con el anterior playbook, **tenemos que especificar en host
 
 #### https.yml
 
-Este archivo lo tenemos que ejecutar en la máquina frontend, de forma que modificaremos la línea de hosts para que se ejecute en el grupo frontend del archivo inventario.
+**Este archivo lo tenemos que ejecutar en la máquina frontend**, de forma que modificaremos la línea de hosts para que se ejecute en el grupo frontend del archivo inventario.
 
 ```yml
 ---
@@ -1015,10 +1038,13 @@ Este archivo lo tenemos que ejecutar en la máquina frontend, de forma que modif
         state: present
 
     - name: Descarga de certificado para TLS / SSL
-      ansible.builtin.command: certbot --apache -m "{{ Certbot_Email }}" --agree-tos --no-eff-email -d "{{ Certbot_Domain }}"
+      ansible.builtin.command: certbot --apache -m "{{ Certbot.Email }}" --agree-tos --no-eff-email -d "{{ Certbot.Domain }}"
       register: realizar_cambio
       changed_when: realizar_cambio.rc == 0
+      when: certificado | d(False) == "descargar"
 ```
+
+**Usaremos para evitar la ejecución de la descarga del certificado de Let's Encrypt el Statement When**, pondremos el When al mismo nivel y justamente después de la tarea concreta y **usaremos una variable**, **certificado que por defecto no se ejecutará hasta que el contenido de la variable sea "descargar"**.
 
 #### deploy_wordpress.yml
 
@@ -1068,25 +1094,25 @@ Este playbook lo ejecutaremos en la máquina frontend y nos servirá para descar
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: database_name_here
-        replace: "{{ DB_Name }}"
+        replace: "{{ Database.Name }}"
 
     - name: Modificación del archivo wp-config.php para especificar el usuario de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: username_here
-        replace: "{{ DB_User }}"
+        replace: "{{ Database.User }}"
 
     - name: Modificación del archivo wp-config.php para especificar la contraseña del usuario
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: password_here
-        replace: "{{ DB_Password }}"
+        replace: "{{ Database.Password }}"
 
     - name: Modificación del archivo wp-config.php para especificar el servidor de la base de datos
       ansible.builtin.replace:
         path: /var/www/html/wordpress/wp-config.php
         regexp: localhost
-        replace: "{{ DB_Host }}"
+        replace: "{{ Database.Host }}"
 
     - name: Copiado del archivo index.php de html/wordpress a html
       ansible.builtin.copy:
@@ -1106,8 +1132,8 @@ Este playbook lo ejecutaremos en la máquina frontend y nos servirá para descar
         path: /var/www/html/wordpress/wp-config.php
         insertafter: DB_COLLATE
         block: |
-          define('WP_HOME', '{{ WP_Home }}');
-          define('WP_SITEURL', '{{ WP_SiteURL }}');
+          define('WP_HOME', '{{ WordPress.Home }}');
+          define('WP_SITEURL', '{{ WordPress.SiteURL }}');
     - name: Cambio de propietario y grupo para /var/www/html
       ansible.builtin.file:
         path: /var/www/html
@@ -1151,17 +1177,17 @@ Con este último playbook, crearemos la base de datos junto al usuario y su cont
 
     - name: Creación de la base de datos usando el socket de PyMySQL
       community.mysql.mysql_db:
-        name: "{{ DB_Name }}"
+        name: "{{ Database.Name }}"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
     - name: Creación del usuario con la contraseña para la base de datos
       no_log: true
       community.mysql.mysql_user:
-        name: "{{ DB_User }}"
+        name: "{{ Database.User }}"
         host: '%'
-        password: "{{ DB_Password }}"
-        priv: "{{ DB_Name }}.*:ALL"
+        password: "{{ Database.Password }}"
+        priv: "{{ Database.Name }}.*:ALL"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 ```
@@ -1216,9 +1242,15 @@ Mediante scripts tenemos que acceder a las máquinas mediante SSH y clonar el re
 >
 > **sudo ./deploy_backend.sh**
 
-Mediante ansible **tenemos que dirigirnos en la máquina local al directorio fase-1**, **dónde se encuentra tanto inventario como main.yml** y ejecutar:
+Mediante ansible **tenemos que dirigirnos en la máquina local al directorio fase-1**, **dónde se encuentra tanto inventario como main.yml**.
+
+**Con el siguiente comando evitamos ejecutar en el playbook https**, **la última tarea que consiste en la descarga del certificado de Let's Encrypt**, que nos sirve para ejecuciones posteriores de los playbooks en las mismas máquina y siempre que una tenga un certificado de Let's Encrypt, ya que dejaría bloqueado el proceso de descarga del certificado al disponer la máquina de uno.
 
 > **ansible-playbook -i inventario main.yml**
+
+Para nuestra primera vez con esta fase necesitamos que nuestro frontend tenga el certificado, por lo que tenemos que ejecutar:
+
+> **ansible-playbook -i inventario main.yml --extra-vars "certificado=descargar"**
 
 Una vez hayamos finalizado, accederemos mediante la dirección IP pública o el nombre de dominio que hemos preparado en un navegador web.
 
@@ -1510,84 +1542,44 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=accept-new'
 
 #### variables.yml
 
-Podemos reciclar el anterior archivo de variables ya que tendremos que añadir un poco más de contenido y cambiar el contenido de algunas variables.
+Podemos reciclar el anterior archivo de variables ya que tendremos que añadir un poco más de contenido y cambiar el contenido de algunas variables. En este archivo vamos a agrupar las variables que se ejecutan en una misma máquina.
 
 ```yml
-Certbot_Email: tetz_dqhwr17@yutep.com
-Certbot_Domain: practica09iawjrrl.ddns.net
-```
+Balancer:
+  Local_Source: ../templates/000-default-balancer.conf.j2
 
-Como hicimos anteriormente, estas variables nos sirven para obtener el certificado de Let's Encrypt en la máquina que hará de balanceador de carga.
-
-```yml
-LocalSource_000_default_balancer: ../templates/000-default-balancer.conf.j2
-
-IP_HTTP_Server_1: 172.31.77.79
-
-IP_HTTP_Server_2: 172.31.78.66
+  IP_HTTP_Server_1: 172.31.77.79
+  IP_HTTP_Server_2: 172.31.78.66
 ```
 
 Con estas tres siguientes variables **establecemos la ruta local del template 000-default-balancer.conf.j2 para el balanceador de carga** y las direcciones IP privadas de las máquinas frontend para el template.
 
 ```yml
-LocalSource_000_default_frontend: ../templates/000-default-frontend.conf.j2
+Frontend:
+  Local_Source_000: ../templates/000-default-frontend.conf.j2
+  DocumentRoot: /var/www/html
 
-DocumentRoot_directory: /var/www/html
+  Local_Source_dir: ../templates/dir.conf.j2
+
+  Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 ```
 
-También **estableceremos la ruta local del template 000-default-frontend.conf.j2 para los equipos frontend** y la variable del DocumentRoot dónde se alojan los sitios web para el template.
+También **estableceremos la ruta local del template 000-default-frontend.conf.j2 para los equipos frontend** y la variable del DocumentRoot dónde se alojan los sitios web para el template.También estableceremos la ruta local del archivo dir.conf.j2 y el contenido del template para priorizar el archivo index.php sobre el index.html.
 
 ```yml
-LocalSource_dir: ../templates/dir.conf.j2
+NFS_Server:
+  Local_Source_exports: ../templates/exports.j2
 
-Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+  Shared_directory_exports: /var/www/html
+
+  Range_AWS_Private_IP_exports: 172.31.0.0/16
+
+  NFS_Options_exports: rw,sync,no_root_squash,no_subtree_check
+
+  Private_IP_NFS_Server: 172.31.65.63
 ```
 
-Estableceremos la ruta local del archivo dir.conf.j2 y el contenido del template para priorizar el archivo index.php sobre el index.html.
-
-```yml
-LocalSource_exports: ../templates/exports.j2
-
-Shared_directory: /var/www/html
-
-Range_AWS_Private_IP: 172.31.0.0/16
-
-NFS_Options: rw,sync,no_root_squash,no_subtree_check
-```
-
-Las siguientes cuatro variables son la localización del template exports.j2 en el equipo local, el directorio del servidor NFS que hay que compartir, el rango de direcciones desde dónde tiene que aceptar el servidor NFS peticiones de compartición del directorio compartido y las opciones para el template.
-
-```yml
-PHP_Packages:
-  - php
-  - libapache2-mod-php
-  - php-mysql
-```
-
-Con esta lista realizaremos la instalación de PHP y los módulos de PHP para conectar con Apache y MySQL.
-
-```yml
-DB_Name: wordpress_db
-DB_User: wordpress_user
-DB_Password: wordpress_pass
-DB_Host: 172.31.76.41
-```
-
-Con estas cuatro variables estableceremos la base de datos, el usuario y su contraseña y el equipo dónde se encuentran.
-
-```yml
-WP_Home: https://practicasiaw09jrrl.ddns.net
-
-WP_SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
-```
-
-Con WP_Home establecemos la forma que debe tener la URL de nuestro sitio web y con WP_SiteURL establecemos la ruta interna de los archivos de WordPress.
-
-```yml
-Private_IP_NFS_Server: 172.31.65.63
-```
-
-Esta última variable nos permite establecer la dirección IP privada que tiene la máquina con NFS Server.
+Las siguientes variables son la localización del template exports.j2 en el equipo local, el directorio del servidor NFS que hay que compartir, el rango de direcciones desde dónde tiene que aceptar el servidor NFS peticiones de compartición del directorio compartido, las opciones para el archivo exports y la IP privada de la máquina NFS Server.
 
 #### 000-default-balancer.conf.j2
 
@@ -1597,10 +1589,10 @@ Con este template estableceremos las direcciones IP de las máquinas frontend y 
 <VirtualHost *:80>
     <Proxy balancer://cluster-frontend>
         # Frontend 1
-        BalancerMember http://{{ IP_HTTP_Server_1 }}
+        BalancerMember http://{{ Balancer.IP_HTTP_Server_1 }}
 
         # Frontend 2
-        BalancerMember http://{{ IP_HTTP_Server_2 }}
+        BalancerMember http://{{ Balancer.IP_HTTP_Server_2 }}
     </Proxy>
 
     ProxyPass / balancer://cluster-frontend/
@@ -1615,11 +1607,11 @@ Usaremos este template para permitir el uso de archivos .htaccess en el director
 <VirtualHost *:80>
     #ServerName www.example.org
     ServerAdmin webmaster@localhost
-    DocumentRoot {{ DocumentRoot_directory }}
+    DocumentRoot {{ Frontend.DocumentRoot }}
 
     #LogLevel info ssl:warm
 
-    <Directory "{{ DocumentRoot_directory }}">
+    <Directory "{{ Frontend.DocumentRoot }}">
         AllowOverride All
     </Directory>
 
@@ -1633,7 +1625,7 @@ Usaremos este template para permitir el uso de archivos .htaccess en el director
 Este template nos permite establecer el directorio a compartir en el NFS Server, el rango de direcciones IP que admite para compartir y las opciones que tiene el directorio que vamos a compartir.
 
 ```j2
-{{ Shared_directory }} {{ Range_AWS_Private_IP }}({{ NFS_Options }})
+{{ NFS_Server.Shared_directory_exports }} {{ NFS_Server.Range_AWS_Private_IP_exports }}({{ NFS_Options_exports }})
 ```
 
 #### install_nfs_server.yml
@@ -1675,7 +1667,7 @@ Incluiremos el archivo de variables en el playbook, actualizaremos los repositor
 
     - name: Copiado de template exports.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_exports }}"
+        src: "{{ NFS_Server.Local_Source_exports }}"
         dest: /etc/exports
         mode: 0644
 
@@ -1707,7 +1699,7 @@ Debemos actualizar los repositorios y los programas instalados con respecto a lo
 ```yml
     - name: Copiado de template 000-default-balancer.conf.j2 al equipo remoto
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default_balancer }}"
+        src: "{{ Balancer.Local_Source }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
       notify: Reinicio de servidor Apache
@@ -1738,13 +1730,13 @@ Realizaremos la instalación de Apache, PHP y los módulos de PHP para conectar 
 
     - name: Copiado de template 000-default-frontend.conf.j2 a los equipos remotos
       ansible.builtin.template:
-        src: "{{ LocalSource_000_default_frontend }}"
+        src: "{{ Frontend.Local_Source_000 }}"
         dest: /etc/apache2/sites-available/000-default.conf
         mode: 0644
 
     - name: Copiado de template dir.conf.j2 a los equipos remotos
       ansible.builtin.template:
-        src: "{{ LocalSource_dir }}"
+        src: "{{ Frontend.Local_Source_dir }}"
         dest: /etc/apache2/mods-available/dir.conf
         mode: 0644
 ```
@@ -1774,7 +1766,7 @@ Este playbook es para instalar el cliente NFS en las máquinas frontend y poder 
     - name: Montado del directorio compartido del servidor NFS en los clientes
       ansible.posix.mount:
         path: /var/www/html
-        src: "{{ Private_IP_NFS_Server }}:/var/www/html"
+        src: "{{ NFS_Server.Private_IP_NFS_Server }}:/var/www/html"
         fstype: nfs
         state: mounted
         opts: auto,nofail,noatime,nolock,intr,tcp,actimeo=1800
@@ -1804,6 +1796,7 @@ Estableceremos el orden de ejecución de los playbooks en nuestro archivo princi
 - name: Ejecución del playbook de obtención del certificado de Let's Encrypt
   ansible.builtin.import_playbook:
     playbooks/https.yml
+  when: certificado | d(False) == "descargar"
 
 - name: Ejecución del playbook de preparación de los equipos frontend
   ansible.builtin.import_playbook:
@@ -1866,9 +1859,9 @@ Con este orden instalamos Apache, PHP, los módulos de PHP necesarios para conec
 >
 > **sudo ./deploy_backend.sh**
 
-Si queremos hacer la ejecución mediante Ansible, debemos ejecutar:
+Tal y como hicimos en la anterior fase, **podemos saltar en este caso la ejecución completa del playbook https.yml mediante el Statement When**, por lo que para nuestra primera ejecución tendremos que usar el comando:
 
-> **ansible-playbook -i inventario main.yml**
+> **ansible-playbook -i inventario main.yml --extra-vars "certificado=descargar"**
 
 Cuando hayamos realizado la ejecución mediante scripts o Ansible, accederemos mediante la dirección IP o el nombre de dominio que hemos puesto en No-IP.
 

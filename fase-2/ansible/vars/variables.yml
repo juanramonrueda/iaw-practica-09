@@ -37,7 +37,7 @@ Frontend:
   Local_Source_dir: ../templates/dir.conf.j2
 
   # Variable de cambio del contenido del template dir.conf.j2
-  Directory_index_dir: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+  Directory_index: DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 
 
 #------------------------------------------------------------------------------------------------------
