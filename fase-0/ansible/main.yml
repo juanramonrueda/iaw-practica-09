@@ -3,11 +3,14 @@
 - name: Importación de playbook para instalar la pila LAMP
   ansible.builtin.import_playbook:
     playbooks/install_lamp.yml
+  tags: lamp
 
 - name: Importación de playbook para preparar HTTPS
   ansible.builtin.import_playbook:
     playbooks/https.yml
+  tags: certificado
 
 - name: Importación de playbook para el despliegue de WordPress
   ansible.builtin.import_playbook:
     playbooks/deploy_wordpress.yml
+  tags: wordpress
