@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------------------------------
 # Variables para la obtención del certificado de Let's Encrypt para TLS
 
-Cerbot:
+Certbot:
   Email: tetz_dqhwr17@yutep.com
   Domain: practicasiaw09jrrl.ddns.net
 
@@ -53,5 +53,5 @@ Database:
 # Variables para la personalización de la URL de WordPress
 
 WordPress:
-  Home: https://practicasiaw09jrrl.ddns.net
-  SiteURL: https://practicasiaw09jrrl.ddns.net/wordpress
+  Home: http://practicasiaw09jrrl.ddns.net
+  SiteURL: http://practicasiaw09jrrl.ddns.net/wordpress
