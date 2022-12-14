@@ -14,7 +14,7 @@
 
 - name: Importación del playbook para el despliegue en el equipo frontend
   ansible.builtin.import_playbook:
-    playbooks/deploy_frontend.yml
+    playbooks/deploy_wordpress.yml
 
 - name: Importación del playbook para el despliegue en el equipo backend
   ansible.builtin.import_playbook:
