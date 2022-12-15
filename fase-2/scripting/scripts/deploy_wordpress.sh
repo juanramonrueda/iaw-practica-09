@@ -58,6 +58,8 @@ sed -i "/DB_COLLATE/a define('WP_HOME', '$WP_Home');" /var/www/html/wordpress/wp
 # Modificación del archivo wp-config.php para indicar la ruta interna de WordPress
 sed -i "/WP_HOME/a define('WP_SITEURL', '$WP_SiteURL');" /var/www/html/wordpress/wp-config.php
 
+sed -i "/WP_SiteURL/a \$_SERVER['HTTPS'] = 'on';" /var/www/html/wordpress/wp-config.php
+
 
 #-----------------------------------------------------------------------------------------------
 # Cambiamos el propietario y el grupo a Apache

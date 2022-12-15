@@ -79,8 +79,15 @@
         path: /var/www/html/wordpress/wp-config.php
         insertafter: DB_COLLATE
         block: |
-          define('WP_HOME', '{{ WordPress.Home }}');
-          define('WP_SITEURL', '{{ WordPress.SiteURL }}');
+          define( 'WP_HOME', '{{ WordPress.Home }}' );
+          define( 'WP_SITEURL', '{{ WordPress.SiteURL }}' );
+          $_SERVER['HTTPS'] = 'on';
+
+    - name: Borrado del marcado del módulo blockinfile
+      ansible.builtin.lineinfile:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: ANSIBLE MANAGED BLOCK
+        state: absent
 
     - name: Cambio de propietario y grupo para /var/www/html
       ansible.builtin.file:
