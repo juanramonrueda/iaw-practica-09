@@ -1398,10 +1398,18 @@ sed -i "/DB_COLLATE/a define('WP_HOME', '$WP_Home');" /var/www/html/wordpress/wp
 
 sed -i "/WP_HOME/a define('WP_SITEURL', '$WP_SiteURL');" /var/www/html/wordpress/wp-config.php
 
+sed -i "/WP_SITEURL/a \$_SERVER['HTTPS'] = 'on';" /var/www/html/wordpress/wp-config.php
+
 chown www-data:www-data -R /var/www/html
 ```
 
 Tenemos que importar el archivo de variables, descargar el código fuente de WordPress, instalar Unzip y descomprimir los archivos de WordPress en /var/www/html, después copiar el archivo wp-config-sample.php para renombrar el archivo wp-config.php y modificar su contenido, también subiremos un nivel el archivo index.php y modificaremos su contenido y por último, cambiaremos tanto el propietario como el grupo a Apache de todos los archivos que hay en /var/www/html.
+
+```bash
+sed -i "/WP_SITEURL/a \$_SERVER['HTTPS'] = 'on';" /var/www/html/wordpress/wp-config.php
+```
+
+Para que nuestra arquitectura funcione correctamente, **tenemos que añadir a wp-config.php el código *$_SERVER['HTTPS'] = 'on';*** ya que **como tenemos conexiones HTTP entre el balanceador de carga y los frontales**, **es posible que** nos de problemas el hecho de que **se mezclen peticiones HTTP con HTTPS**, de forma que con esa línea **hacemos que únicamente se realicen mediante HTTPS**. **Tenemos que usar el backslash o \ para hacer una secuencia de escape para el símbolo \$ ya que el comando SED cogería el símbolo y su continuación como una variable**.
 
 **Este script lo ejecutaremos en la máquina que tiene el NFS Server**.
 
@@ -1688,7 +1696,24 @@ Este playbook lo ejecutaremos en la máquina NFS Server para desplegar WordPress
 - name: Despliegue de WordPress en el servidor NFS
   hosts: nfs_server
   become: true
+
+    - name: Modificación del archivo wp-config.php para la personalización de la URL
+      ansible.builtin.blockinfile:
+        path: /var/www/html/wordpress/wp-config.php
+        insertafter: DB_COLLATE
+        block: |
+          define( 'WP_HOME', '{{ WordPress.Home }}' );
+          define( 'WP_SITEURL', '{{ WordPress.SiteURL }}' );
+          $_SERVER['HTTPS'] = 'on';
+
+    - name: Borrado del marcado del módulo blockinfile
+      ansible.builtin.lineinfile:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: ANSIBLE MANAGED BLOCK
+        state: absent
 ```
+
+Puesto que tenemos que añadir tres líneas, usaremos el módulo blockinfile, **es posible que con el módulo nos añada un par de líneas para indicar el inicio de la inserción de código y el final**, **por lo que tenemos que borrar dichas líneas para que no den problemas**, para ello, usaremos el módulo lineinfile, buscaremos con toda la precisión posible las líneas para borrarlas y marcaremos su state como absent para eliminarlas.
 
 #### deploy_balancer.yml
 
@@ -1876,6 +1901,18 @@ Podremos los datos del sitio y pulsaremos en Instalar WordPress.
 ![WordPress Domain](img/fase-2/WordPress_Domain.png)
 
 Cuando hayamos realizado la instalación de WordPress, accederemos mediante el dominio que hemos asignado para comprobar que nuestro certificado en el balanceador de carga funciona correctamente.
+
+![WordPress_BackOffice](img/fase-2/WordPress_BackOffice.png)
+
+Accederemos al BackOffice de WordPress para comprobar que funciona correctamente, en la URL tenemos que poner:
+
+> **https://nombre-dominio/wp-login.php**
+
+Ó
+
+> **https://nombre-dominio/wordpress/wp-login.php**
+
+De cualquiera de las formas nos sirven ya que con la primera usamos la redirección que hemos establecido en wp-config.php y con la segunda forma hacemos referencia al directorio y al archivo de acceso, ponemos los datos de acceso que hemos establecido durante la instalación en el navegador web y veremos que podemos acceder sin problemas.
 
 ![fstab](img/fase-2/fstab.png)
 
