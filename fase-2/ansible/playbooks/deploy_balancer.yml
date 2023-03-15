@@ -18,55 +18,21 @@
         name: apache2
         state: present
 
-    - name: Habilitación de módulo proxy para el balanceador de carga
+    - name: Habilitación de módulos para el balanceador de carga
       community.general.apache2_module:
-        name: proxy
+        name: "{{ item }}"
         state: present
-
-    - name: Habilitación de módulo proxy_http para el balanceador de carga
-      community.general.apache2_module:
-        name: proxy_http
-        state: present
-
-    - name: Habilitación de módulo proxy_ajp para el balanceador de carga
-      community.general.apache2_module:
-        name: proxy_ajp
-        state: present
-
-    - name: Habilitación de módulo rewrite para el balanceador de carga
-      community.general.apache2_module:
-        name: rewrite
-        state: present
-
-    - name: Habilitación de módulo deflate para el balanceador de carga
-      community.general.apache2_module:
-        name: deflate
-        state: present
-
-    - name: Habilitación de módulo headers para el balanceador de carga
-      community.general.apache2_module:
-        name: headers
-        state: present
-
-    - name: Habilitación de módulo proxy_balancer para el balanceador de carga
-      community.general.apache2_module:
-        name: proxy_balancer
-        state: present
-
-    - name: Habilitación de módulo proxy_connect para el balanceador de carga
-      community.general.apache2_module:
-        name: proxy_connect
-        state: present
-
-    - name: Habilitación de módulo proxy_html para el balanceador de carga
-      community.general.apache2_module:
-        name: proxy_html
-        state: present
-
-    - name: Habilitación de módulo lbmethod_byrequests para el balanceador de carga
-      community.general.apache2_module:
-        name: lbmethod_byrequests
-        state: present
+       with_items:
+        - lbmethod_byrequests
+        - proxy_html
+        - proxy_connect
+        - proxy_balancer
+        - headers
+        - deflate
+        - rewrite
+        - proxy_ajp
+        - proxy_http
+        - proxy
 
     - name: Copiado de template 000-default-balancer.conf.j2 al equipo remoto
       ansible.builtin.template:
